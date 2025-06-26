@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], },
+                    colors: { textPrimary: '#2d2d2d', textSecondary: '#595959', textPrice: '#000000', accentPrimary: '#007BFF', borderDefault: '#E3E3E3', bgPage: '#F4F7F9', bgCard: '#FFFFFF' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bgPage font-sans">
+    <div class="p-4">
+        <header class="mb-6">
+            <h1 class="text-2xl font-bold text-textPrimary">我收藏的房源</h1>
+            <p class="text-textSecondary">你可以在这里找到所有你感兴趣的房源</p>
+        </header>
+
+        <!-- Container for dynamically loaded listings -->
+        <main id="saved-listings-container" class="space-y-4 pt-2 hidden">
+            <!-- JavaScript will populate this section -->
+        </main>
+        
+        <!-- Empty state container, shown when no items are saved -->
+        <div id="empty-state-container" class="text-center pt-20 hidden">
+            <i class="fa-regular fa-folder-open text-6xl text-textSecondary/30"></i>
+            <h2 class="mt-6 text-lg font-semibold text-textPrimary">你的收藏夹是空的</h2>
+            <p class="mt-2 text-sm text-textSecondary max-w-xs mx-auto">快去列表页发现并收藏你喜欢的房源吧！</p>
+            <a href="./listings.html" class="mt-6 inline-block bg-accentPrimary text-white font-bold py-2.5 px-6 rounded-lg hover:opacity-90 transition-opacity">
+                去发现
+            </a>
+        </div>
+    </div>
+    
+    <!-- Link the new JavaScript file -->
+    <script src="./scripts/saved.js"></script>
+</body>
+</html>

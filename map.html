@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房源地图</title>
+    <style>
+        /* Ensure the map fills the entire screen */
+        html, body, #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif; /* Keep font consistent */
+        }
+    </style>
+</head>
+<body>
+    <!-- The div where the map will be rendered -->
+    <div id="map"></div>
+
+    <!-- 
+      The Google Maps script. 
+      - We use your API key.
+      - The `callback=initMap` parameter tells the script to run the initMap function once it's loaded.
+      - `defer` ensures the script is executed after the document has been parsed.
+    -->
+    <script src="./scripts/map.js" defer></script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDR-IqWUXtp64-Pfp09FwGvFHnbKjMNuqU&callback=initMap&v=weekly">
+    </script>
+</body>
+</html>

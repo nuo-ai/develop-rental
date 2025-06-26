@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 样式和脚本由父页面 index.html 提供 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        textPrimary: '#2d2d2d',
+                        textSecondary: '#595959',
+                        textPrice: '#000000',
+                        accentPrimary: '#007BFF',
+                        borderDefault: '#E3E3E3',
+                        bgPage: '#F4F7F9',
+                        bgCard: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        #detail-map {
+            height: 12rem; /* 192px */
+            width: 100%;
+            background-color: #E3E3E3;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-bgCard font-sans flex flex-col h-screen">
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="flex items-center justify-center h-full">
+        <p class="text-textSecondary">正在加载房源详情...</p>
+    </div>
+
+    <!-- 主要内容区域，可独立滚动 -->
+    <main id="main-content" class="flex-grow overflow-y-auto hidden">
+        <!-- 1. 图片与顶部导航 -->
+        <div id="image-carousel" class="relative">
+            <!-- JavaScript will populate this section -->
+        </div>
+
+        <!-- 2. 核心信息区 -->
+        <div class="p-4 pb-0">
+            <!-- 价格、地址、收藏 -->
+            <div class="flex justify-between items-start">
+                <div>
+                    <p id="property-price" class="text-2xl font-extrabold text-textPrice"></p>
+                    <div class="mt-2">
+                        <h1 id="property-address" class="text-xl font-bold text-textPrimary"></h1>
+                        <h2 id="property-suburb-postcode" class="text-lg text-textSecondary"></h2>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 pt-1">
+                     <button class="w-10 h-10 flex items-center justify-center text-textSecondary hover:text-accentPrimary transition-colors">
+                        <i class="fa-solid fa-arrow-up-from-bracket text-xl"></i>
+                    </button>
+                    <button class="w-10 h-10 flex items-center justify-center text-textSecondary hover:text-red-500 transition-colors">
+                        <i class="fa-regular fa-star text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 房型与可入住日期 -->
+            <div class="flex items-center text-sm text-textSecondary mt-3">
+                <div id="property-specs" class="flex items-center gap-3">
+                    <!-- JS will populate this -->
+                </div>
+                <div class="mx-3 text-borderDefault">|</div>
+                <span id="property-type"></span>
+            </div>
+             <p id="property-availability" class="text-sm text-textSecondary mt-2"></p>
+             <p id="property-bond" class="text-sm text-textSecondary mt-1"></p>
+        </div>
+        
+        <!-- 3. 操作按钮组 -->
+        <div class="p-4">
+            <div class="grid grid-cols-4 gap-2 text-center text-accentPrimary">
+                <a href="#" class="p-2 rounded-lg hover:bg-bgPage transition-colors">
+                    <i class="fa-regular fa-envelope text-2xl"></i>
+                    <span class="block text-xs mt-1 font-medium">Email</span>
+                </a>
+                 <a href="#" class="p-2 rounded-lg hover:bg-bgPage transition-colors">
+                    <i class="fa-solid fa-phone text-2xl"></i>
+                    <span class="block text-xs mt-1 font-medium">Call</span>
+                </a>
+                 <a href="#" class="p-2 rounded-lg hover:bg-bgPage transition-colors">
+                    <i class="fa-regular fa-calendar-check text-2xl"></i>
+                    <span class="block text-xs mt-1 font-medium">Inspections</span>
+                </a>
+                 <a href="#" class="p-2 rounded-lg hover:bg-bgPage transition-colors">
+                    <i class="fa-regular fa-star text-2xl"></i>
+                    <span class="block text-xs mt-1 font-medium">Shortlist</span>
+                </a>
+            </div>
+        </div>
+
+        <hr class="h-px bg-borderDefault mx-4">
+
+        <!-- 4. 房源描述 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold text-textPrimary mb-3">Property Description</h2>
+            <div id="description-wrapper">
+                <p id="property-description" class="text-textSecondary leading-relaxed text-sm max-h-24 overflow-hidden">
+                </p>
+                <button id="read-more-btn" class="text-accentPrimary font-semibold text-sm mt-2 hover:underline">Read more</button>
+            </div>
+        </div>
+
+        <hr class="h-px bg-borderDefault mx-4">
+        
+        <!-- 5. 地图位置 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold text-textPrimary mb-3">Map</h2>
+            <!-- UPDATED: Replaced img with a div for the dynamic map -->
+            <div id="detail-map"></div>
+        </div>
+        
+        <hr class="h-px bg-borderDefault mx-4">
+
+        <!-- 6. 看房时间 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold text-textPrimary mb-3">Inspection times</h2>
+            <div id="inspection-times-container" class="space-y-3">
+                <!-- JS will populate this -->
+            </div>
+        </div>
+        
+        <!-- 空白占位，让底部内容滚动时有足够空间 -->
+        <div class="h-4"></div>
+
+    </main>
+
+    <!-- 关键！引入详情页的JavaScript文件 -->
+    <script src="./scripts/details.js"></script>
+
+</body>
+</html>
