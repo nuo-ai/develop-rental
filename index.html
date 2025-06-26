@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>悉尼学生房源中心 - 原型</title>
+    <title>悉尼学生房源中心</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -34,6 +34,10 @@
         iframe {
             border: none;
         }
+        /* Style for the active nav link */
+        .nav-link.active {
+            color: #007BFF;
+        }
     </style>
 </head>
 
@@ -61,17 +65,16 @@
                 </main>
 
                 <!-- 3. 底部iOS Tab Bar导航栏 -->
-                <nav class="absolute bottom-0 left-0 w-full h-[84px] bg-neutral-100/80 backdrop-blur-md border-t border-borderDefault flex justify-around items-center pt-2 z-20">
-                    <a href="./listings.html" target="content-frame" class="flex flex-col items-center gap-1 text-accentPrimary w-16">
+                <nav id="main-nav" class="absolute bottom-0 left-0 w-full h-[84px] bg-neutral-100/80 backdrop-blur-md border-t border-borderDefault flex justify-around items-center pt-2 z-20">
+                    <a href="./listings.html" class="nav-link flex flex-col items-center gap-1 w-16 active">
                         <i class="fa-solid fa-magnifying-glass text-xl"></i>
                         <span class="text-xs font-medium">搜索</span>
                     </a>
-                    <a href="./saved.html" target="content-frame" class="flex flex-col items-center gap-1 text-textSecondary hover:text-accentPrimary transition-colors">
+                    <a href="./saved.html" class="nav-link flex flex-col items-center gap-1 text-textSecondary w-16 hover:text-accentPrimary transition-colors">
                         <i class="fa-regular fa-heart text-xl"></i>
                         <span class="text-xs font-medium">收藏</span>
                     </a>
-                    <!-- UPDATED: Map link now points to map.html -->
-                    <a href="./map.html" target="content-frame" class="flex flex-col items-center gap-1 text-textSecondary hover:text-accentPrimary transition-colors">
+                    <a href="./map.html" class="nav-link flex flex-col items-center gap-1 text-textSecondary w-16 hover:text-accentPrimary transition-colors">
                         <i class="fa-regular fa-map text-xl"></i>
                         <span class="text-xs font-medium">地图</span>
                     </a>
@@ -81,5 +84,38 @@
         </div>
     </div>
 
+    <!-- NEW: JavaScript to control iframe navigation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainNav = document.getElementById('main-nav');
+            const contentFrame = document.getElementById('content-frame');
+            const navLinks = mainNav.querySelectorAll('.nav-link');
+
+            mainNav.addEventListener('click', function(event) {
+                // Find the link that was clicked on
+                const clickedLink = event.target.closest('.nav-link');
+
+                if (clickedLink) {
+                    // Prevent the default link behavior (which navigates the whole page)
+                    event.preventDefault(); 
+
+                    const destination = clickedLink.getAttribute('href');
+                    
+                    // Only change the iframe src if it's different, to avoid unnecessary reloads
+                    if (contentFrame.src !== new URL(destination, window.location.href).href) {
+                        contentFrame.src = destination;
+                    }
+
+                    // Update active styles
+                    navLinks.forEach(link => {
+                        link.classList.remove('active', 'text-accentPrimary');
+                        link.classList.add('text-textSecondary');
+                    });
+                    clickedLink.classList.add('active', 'text-accentPrimary');
+                    clickedLink.classList.remove('text-textSecondary');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
