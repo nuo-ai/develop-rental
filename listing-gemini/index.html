@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>悉尼学生房源中心 - 原型</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        textPrimary: '#2d2d2d',
+                        textSecondary: '#595959',
+                        textPrice: '#000000',
+                        accentPrimary: '#007BFF',
+                        borderDefault: '#E3E3E3',
+                        bgPage: '#F4F7F9',
+                        bgCard: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        iframe {
+            border: none;
+        }
+    </style>
+</head>
+
+<body class="bg-bgPage flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-[393px] h-[852px] bg-black rounded-[60px] shadow-2xl p-4">
+        <div class="w-full h-full bg-black rounded-[40px] overflow-hidden relative">
+            
+            <div class="w-full h-full bg-white flex flex-col">
+
+                <!-- 1. 顶部iOS状态栏 -->
+                <div class="absolute top-0 left-0 w-full h-[44px] px-7 flex justify-between items-center z-20 text-textPrimary">
+                    <span class="font-semibold text-sm">9:41</span>
+                    <div class="absolute top-2.5 left-1/2 -translate-x-1/2 w-32 h-8 bg-black rounded-full"></div>
+                    <div class="flex items-center space-x-1">
+                        <i class="fa-solid fa-signal text-xs"></i>
+                        <i class="fa-solid fa-wifi text-xs"></i>
+                        <i class="fa-solid fa-battery-full text-sm"></i>
+                    </div>
+                </div>
+
+                <!-- 2. 主内容显示区域 (iframe) -->
+                <main class="flex-1 pt-[44px] pb-[84px]">
+                    <iframe id="content-frame" src="./listings.html" class="w-full h-full"></iframe>
+                </main>
+
+                <!-- 3. 底部iOS Tab Bar导航栏 -->
+                <nav class="absolute bottom-0 left-0 w-full h-[84px] bg-neutral-100/80 backdrop-blur-md border-t border-borderDefault flex justify-around items-center pt-2 z-20">
+                    <a href="./listings.html" target="content-frame" class="flex flex-col items-center gap-1 text-accentPrimary w-16">
+                        <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                        <span class="text-xs font-medium">搜索</span>
+                    </a>
+                    <a href="./saved.html" target="content-frame" class="flex flex-col items-center gap-1 text-textSecondary hover:text-accentPrimary transition-colors">
+                        <i class="fa-regular fa-heart text-xl"></i>
+                        <span class="text-xs font-medium">收藏</span>
+                    </a>
+                    <!-- UPDATED: Map link now points to map.html -->
+                    <a href="./map.html" target="content-frame" class="flex flex-col items-center gap-1 text-textSecondary hover:text-accentPrimary transition-colors">
+                        <i class="fa-regular fa-map text-xl"></i>
+                        <span class="text-xs font-medium">地图</span>
+                    </a>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

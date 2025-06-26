@@ -1,0 +1,102 @@
+<!-- Filter Panel Overlay -->
+<div id="filter-overlay" class="fixed inset-0 bg-black/50 z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+<!-- Filter Panel -->
+<div id="filter-panel" class="fixed bottom-0 left-0 w-full bg-bgPage rounded-t-2xl shadow-2xl z-40 transform translate-y-full transition-transform duration-300">
+    <div class="max-h-[85vh] overflow-y-auto p-4">
+        <!-- Panel Header -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-textPrimary">筛选条件</h2>
+            <button id="close-filter-panel" class="text-textSecondary hover:text-accentPrimary">
+                <i class="fa-solid fa-times text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Filter Sections -->
+        <div class="space-y-6">
+            <!-- Price Range Slider -->
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-semibold text-textPrimary">价格范围 (周租, AUD)</h3>
+                    <p id="price-range-display" class="font-semibold text-textPrimary"></p>
+                </div>
+                <div id="price-slider" class="mt-4 mb-2 mx-2"></div>
+            </div>
+
+            <!-- Bedrooms -->
+            <div>
+                <h3 class="font-semibold mb-2 text-textPrimary">卧室</h3>
+                <div id="filter-bedrooms" class="flex flex-wrap gap-2">
+                    <button class="filter-btn active" data-value="any">Any</button>
+                    <button class="filter-btn" data-value="studio/1">Studio / 1</button>
+                    <button class="filter-btn" data-value="2">2</button>
+                    <button class="filter-btn" data-value="3">3</button>
+                    <button class="filter-btn" data-value="4+">4+</button>
+                </div>
+            </div>
+            
+            <!-- Bathrooms -->
+            <div>
+                <h3 class="font-semibold mb-2 text-textPrimary">浴室</h3>
+                <div id="filter-bathrooms" class="flex flex-wrap gap-2">
+                    <button class="filter-btn active" data-value="any">Any</button>
+                    <button class="filter-btn" data-value="1">1</button>
+                    <button class="filter-btn" data-value="2">2</button>
+                    <button class="filter-btn" data-value="3+">3+</button>
+                </div>
+            </div>
+            
+            <!-- Available Date -->
+            <div>
+                <h3 class="font-semibold mb-2 text-textPrimary">空出日期 (Available Before)</h3>
+                <select id="filter-available-date" class="w-full p-2.5 border border-borderDefault rounded-lg text-sm bg-white">
+                    <!-- JS will populate this -->
+                </select>
+            </div>
+            
+            <!-- NEW: Furnished Option -->
+            <div>
+                <h3 class="font-semibold mb-2 text-textPrimary">家具选项</h3>
+                <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-borderDefault">
+                    <span class="text-textSecondary font-medium">只显示带家具的房源</span>
+                    <label for="filter-furnished" class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" id="filter-furnished" class="sr-only">
+                            <div class="toggle-bg block bg-gray-300 w-14 h-8 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 pt-4 border-t border-borderDefault flex items-center gap-3 sticky bottom-0 bg-bgPage pb-2">
+            <button id="reset-filters" class="w-1/3 py-3 text-sm font-bold text-textSecondary bg-gray-200 rounded-lg hover:bg-gray-300 transition">重置</button>
+            <button id="apply-filters" class="w-2/3 py-3 text-sm font-bold text-white bg-accentPrimary rounded-lg hover:opacity-90 transition">显示结果</button>
+        </div>
+    </div>
+    <style>
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #E3E3E3;
+            border-radius: 8px;
+            background-color: #FFFFFF;
+            color: #595959;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-btn.active {
+            background-color: #007BFF;
+            color: white;
+            border-color: #007BFF;
+        }
+        /* Styles for the new toggle switch */
+        #filter-furnished:checked + .toggle-bg {
+            background-color: #007BFF;
+        }
+        #filter-furnished:checked + .toggle-bg .dot {
+            transform: translateX(100%);
+        }
+    </style>
+</div>

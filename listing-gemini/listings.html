@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- 新增: 引入 noUiSlider 的 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        textPrimary: '#2d2d2d',
+                        textSecondary: '#595959',
+                        textPrice: '#000000',
+                        accentPrimary: '#007BFF',
+                        borderDefault: '#E3E3E3',
+                        bgPage: '#F4F7F9',
+                        bgCard: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        #filter-panel-container {
+            transition: opacity 0.3s ease-in-out;
+        }
+        /* 自定义 noUiSlider 样式以匹配我们的设计 */
+        .noUi-target {
+            border: none;
+            background: #E3E3E3;
+            box-shadow: none;
+        }
+        .noUi-connect {
+            background: #007BFF;
+        }
+        .noUi-handle {
+            border: 3px solid #007BFF;
+            border-radius: 50%;
+            background: #FFFFFF;
+            box-shadow: none;
+            cursor: pointer;
+        }
+        .noUi-handle:after, .noUi-handle:before {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-bgPage font-sans">
+
+    <div class="p-4">
+        <!-- 顶部：欢迎语和标题 -->
+        <header class="mb-4">
+            <h1 class="text-2xl font-bold text-textPrimary">为你找到的房源</h1>
+            <p class="text-textSecondary">基于你的偏好，我们推荐以下房源</p>
+        </header>
+
+        <!-- 中部：搜索和筛选栏 -->
+        <div class="sticky top-0 bg-bgPage py-3 z-10">
+            <div class="flex items-center gap-3">
+                <div class="relative flex-grow">
+                    <i class="fa-solid fa-magnifying-glass text-textSecondary absolute top-1/2 left-3.5 -translate-y-1/2"></i>
+                    <input type="text" id="search-input" placeholder="搜索区域, 例如 'Zetland'" class="w-full pl-10 pr-4 py-2.5 bg-bgCard border border-borderDefault rounded-lg focus:outline-none focus:ring-2 focus:ring-accentPrimary text-sm">
+                </div>
+                <button id="filter-button" class="flex-shrink-0 w-11 h-11 bg-bgCard border border-borderDefault rounded-lg flex items-center justify-center text-textPrimary">
+                    <i class="fa-solid fa-sliders text-lg"></i>
+                </button>
+            </div>
+            <div id="results-summary-container" class="pt-3 text-sm text-textSecondary">
+                <!-- JS将在这里填充结果数量 -->
+            </div>
+        </div>
+
+        <!-- 结果列表 -->
+        <main id="listings-container" class="space-y-4 pt-2">
+            <!-- JavaScript将会在这里动态生成房源卡片 -->
+        </main>
+    </div>
+    
+    <!-- 筛选面板容器 -->
+    <div id="filter-panel-container">
+        <!-- JS将在这里加载filter-panel.html -->
+    </div>
+
+    <!-- 新增: 引入 noUiSlider 的 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+    <!-- 引入主JavaScript文件 -->
+    <script src="./scripts/main.js"></script>
+</body>
+</html>
