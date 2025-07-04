@@ -179,23 +179,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. Commute Calculator Logic ---
 
     function setupCommuteCalculator() {
-        // Initialize Google Places Autocomplete on the input field
         if (typeof google !== 'undefined' && google.maps && google.maps.places) {
             const autocomplete = new google.maps.places.Autocomplete(commuteAddressInputEl, {
                 types: ['address'],
-                componentRestrictions: { 'country': 'au' } // Restrict to Australia
+                componentRestrictions: { 'country': 'au' }
             });
 
             autocomplete.addListener('place_changed', () => {
                 const place = autocomplete.getPlace();
                 if (place && place.formatted_address) {
-                    addCommuteLocationBtnEl.disabled = false; // Enable button when a valid place is selected
+                    addCommuteLocationBtnEl.disabled = false;
                 }
             });
         }
         
         commuteAddressInputEl.addEventListener('input', () => {
-            addCommuteLocationBtnEl.disabled = true;
+            if (commuteAddressInputEl.value.trim() === '') {
+                 addCommuteLocationBtnEl.disabled = true;
+            }
         });
 
         commuteModeTabsEl.addEventListener('click', handleTabClick);
@@ -212,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function handleTabClick(e) {
         if (e.target.tagName !== 'BUTTON') return;
-
         const newMode = e.target.dataset.mode;
         if (newMode === activeCommuteMode) return;
 
@@ -227,11 +227,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        renderCommuteResults(); // Re-render results for the new mode
+        renderCommuteResults();
     }
 
     async function fetchCommuteTimeForDestination(destination, mode) {
-        // Set loading state for this specific mode
+        console.log(`Fetching for ${destination.name} with mode ${mode}`);
         destination.isLoading = true;
         renderCommuteResults();
 
@@ -241,12 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error(`Directions API fetch failed with status ${response.status}`);
             
             const result = await response.json();
+            console.log('Received result:', result);
             destination.results[mode] = result;
         } catch (error) {
             console.error('Failed to fetch commute time:', error);
             destination.results[mode] = { error: '无法计算' };
         } finally {
             destination.isLoading = false;
+            console.log('Finished fetching, re-rendering...');
             renderCommuteResults();
         }
     }
@@ -263,18 +265,21 @@ document.addEventListener('DOMContentLoaded', () => {
             name: destinationName,
             address: destinationAddress,
             results: {},
-            isLoading: true
+            isLoading: false
         };
         commuteDestinations.push(newDestination);
         
-        // Immediately fetch data for the currently active mode
-        fetchCommuteTimeForDestination(newDestination, activeCommuteMode);
+        await fetchCommuteTimeForDestination(newDestination, activeCommuteMode);
 
         commuteAddressInputEl.value = '';
         commuteNameInputEl.value = '';
     }
 
     function renderCommuteResults() {
+        console.log('--- Rendering Commute Results ---');
+        console.log('Active Mode:', activeCommuteMode);
+        console.log('All Destinations:', JSON.parse(JSON.stringify(commuteDestinations)));
+
         commuteResultsContainerEl.innerHTML = '';
         if (commuteDestinations.length === 0) {
             commuteResultsContainerEl.innerHTML = `<p class="text-center text-sm text-textSecondary py-4">添加一个目的地来计算通勤时间。</p>`;
@@ -283,9 +288,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         commuteDestinations.forEach(dest => {
             const result = dest.results[activeCommuteMode];
+            console.log(`Rendering card for ${dest.name}. Result for ${activeCommuteMode}:`, result);
             let resultHTML;
 
-            // Show loading if the calculation for the active mode is in progress
             if (dest.isLoading && !result) {
                 resultHTML = `<p class="font-bold text-lg text-textSecondary animate-pulse">计算中...</p>`;
             } else if (result) {
