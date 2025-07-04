@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 4. Commute Calculator Logic ---
+    // --- 4. Commute Calculator Logic (Refactored for Robustness) ---
 
     function setupCommuteCalculator() {
         if (typeof google !== 'undefined' && google.maps && google.maps.places) {
@@ -190,13 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         commuteAddressInputEl.addEventListener('input', () => {
-            if (commuteAddressInputEl.value.trim() === '') {
-                 addCommuteLocationBtnEl.disabled = true;
-            } else {
-                 // This is a fallback for when a user types an address without using autocomplete.
-                 // It's not perfect but allows the button to be enabled.
-                 addCommuteLocationBtnEl.disabled = false;
-            }
+            addCommuteLocationBtnEl.disabled = commuteAddressInputEl.value.trim() === '';
         });
 
         commuteModeTabsEl.addEventListener('click', handleTabClick);
@@ -220,21 +214,29 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.commute-tab-btn.active-tab').classList.remove('active-tab');
         e.target.classList.add('active-tab');
 
+        // Create a list of fetch promises for destinations that don't have data for the new mode
         const fetchPromises = commuteDestinations
             .filter(dest => !dest.results[activeCommuteMode])
             .map(dest => fetchCommuteTimeForDestination(dest, activeCommuteMode));
 
+        // If there are any destinations to fetch, show loading states and wait for all to complete
         if (fetchPromises.length > 0) {
+            // Set loading state for all destinations that will be fetched
+            commuteDestinations.forEach(dest => {
+                if (!dest.results[activeCommuteMode]) {
+                    dest.isLoading = true;
+                }
+            });
+            renderCommuteResults(); // Show all "Loading..." states
+            
             await Promise.all(fetchPromises);
         }
 
+        // Final render after all fetches are complete
         renderCommuteResults();
     }
 
     async function fetchCommuteTimeForDestination(destination, mode) {
-        destination.isLoading = true;
-        renderCommuteResults();
-
         const origin = `${currentProperty.latitude},${currentProperty.longitude}`;
         try {
             const response = await fetch(`/api/get-directions?origin=${origin}&destination=${destination.address}&mode=${mode}`);
@@ -247,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
             destination.results[mode] = { error: '无法计算' };
         } finally {
             destination.isLoading = false;
-            // No final render here, handleTabClick or handleAddLocation will do it.
         }
     }
 
@@ -267,9 +268,12 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         commuteDestinations.push(newDestination);
         
+        // Immediately render to show the new destination in a loading state
+        renderCommuteResults();
+
+        // Fetch the data and then re-render with the result
         await fetchCommuteTimeForDestination(newDestination, activeCommuteMode);
-        
-        renderCommuteResults(); // Final render after fetch is complete
+        renderCommuteResults();
 
         commuteAddressInputEl.value = '';
         commuteNameInputEl.value = '';
@@ -286,7 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = dest.results[activeCommuteMode];
             let resultHTML;
             
-            // This condition is key: show loading if the flag is true for this destination
             if (dest.isLoading) {
                  resultHTML = `<p class="font-bold text-lg text-textSecondary animate-pulse">计算中...</p>`;
             } else if (result) {
@@ -299,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }
             } else {
-                // This state means data for this mode hasn't been fetched yet.
+                // This state means data for this mode hasn't been fetched yet and is not currently loading.
                 resultHTML = `<p class="font-bold text-lg text-textSecondary">--</p>`;
             }
 
