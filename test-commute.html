@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>通勤功能测试</title>
+</head>
+<body>
+    <h1>通勤功能测试</h1>
+    <button onclick="testCommuteAPI()">测试通勤API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testCommuteAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在测试...';
+            
+            try {
+                const response = await fetch('/api/get-directions?origin=-33.8688,151.2093&destination=University of Sydney&mode=DRIVING');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                resultDiv.innerHTML = `
+                    <h3>API测试结果:</h3>
+                    <p><strong>状态:</strong> ${response.status}</p>
+                    <p><strong>距离:</strong> ${data.distance || '未知'}</p>
+                    <p><strong>时间:</strong> ${data.duration || '未知'}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <h3>API测试失败:</h3>
+                    <p><strong>错误:</strong> ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

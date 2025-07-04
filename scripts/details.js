@@ -214,25 +214,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.commute-tab-btn.active-tab').classList.remove('active-tab');
         e.target.classList.add('active-tab');
 
-        // Create a list of fetch promises for destinations that don't have data for the new mode
         const fetchPromises = commuteDestinations
             .filter(dest => !dest.results[activeCommuteMode])
             .map(dest => fetchCommuteTimeForDestination(dest, activeCommuteMode));
 
-        // If there are any destinations to fetch, show loading states and wait for all to complete
         if (fetchPromises.length > 0) {
-            // Set loading state for all destinations that will be fetched
             commuteDestinations.forEach(dest => {
                 if (!dest.results[activeCommuteMode]) {
                     dest.isLoading = true;
                 }
             });
-            renderCommuteResults(); // Show all "Loading..." states
+            renderCommuteResults();
             
             await Promise.all(fetchPromises);
         }
 
-        // Final render after all fetches are complete
         renderCommuteResults();
     }
 
@@ -240,12 +236,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const origin = `${currentProperty.latitude},${currentProperty.longitude}`;
         try {
             const response = await fetch(`/api/get-directions?origin=${origin}&destination=${destination.address}&mode=${mode}`);
-            if (!response.ok) throw new Error(`Directions API fetch failed with status ${response.status}`);
-            
-            const result = await response.json();
-            destination.results[mode] = result;
+            if (!response.ok) throw new Error(`API fetch failed`);
+            destination.results[mode] = await response.json();
         } catch (error) {
-            console.error('Failed to fetch commute time:', error);
+            console.error(error);
             destination.results[mode] = { error: '无法计算' };
         } finally {
             destination.isLoading = false;
@@ -268,10 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         commuteDestinations.push(newDestination);
         
-        // Immediately render to show the new destination in a loading state
         renderCommuteResults();
 
-        // Fetch the data and then re-render with the result
         await fetchCommuteTimeForDestination(newDestination, activeCommuteMode);
         renderCommuteResults();
 
@@ -302,20 +294,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }
             } else {
-                // This state means data for this mode hasn't been fetched yet and is not currently loading.
                 resultHTML = `<p class="font-bold text-lg text-textSecondary">--</p>`;
             }
 
+            // UI FIX: Added "flex-1 min-w-0" to the destination info div
+            // and "truncate" to the name paragraph to prevent overflow.
             const cardHTML = `
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-                    <div>
-                        <p class="font-semibold text-textPrimary">${dest.name}</p>
-                        <p class="text-sm text-textSecondary truncate max-w-xs">${dest.address}</p>
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg gap-4">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-textPrimary truncate">${dest.name}</p>
+                        <p class="text-sm text-textSecondary truncate">${dest.address}</p>
                     </div>
                     <div class="text-right flex-shrink-0 w-24">
                         ${resultHTML}
                     </div>
-                    <button data-id="${dest.id}" class="remove-commute-btn ml-4 text-red-500 hover:text-red-700 text-sm font-semibold flex-shrink-0">移除</button>
+                    <button data-id="${dest.id}" class="remove-commute-btn text-red-500 hover:text-red-700 text-sm font-semibold flex-shrink-0">移除</button>
                 </div>
             `;
             commuteResultsContainerEl.insertAdjacentHTML('beforeend', cardHTML);
