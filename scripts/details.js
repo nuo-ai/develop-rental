@@ -1,14 +1,24 @@
-// --- Sydney Student Rental Hub - Details Page JavaScript ---
+// --- Sydney Student Rental Hub - Details Page JavaScript (Final Corrected Version) ---
 
 // Import the configuration object from our new config file
 import config from './config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. DOM Element Selectors ---
+    // --- 1. DOM Element Selectors (Complete List) ---
     const imageCarouselEl = document.getElementById('image-carousel');
     const propertyPriceEl = document.getElementById('property-price');
-    // ... (other selectors remain the same)
+    const propertyAddressEl = document.getElementById('property-address');
+    const propertySuburbPostcodeEl = document.getElementById('property-suburb-postcode');
+    const propertySpecsEl = document.getElementById('property-specs');
+    const propertyTypeEl = document.getElementById('property-type');
+    const propertyAvailabilityEl = document.getElementById('property-availability');
+    const propertyBondEl = document.getElementById('property-bond');
+    const propertyDescriptionEl = document.getElementById('property-description');
+    const readMoreBtn = document.getElementById('read-more-btn');
+    const inspectionTimesContainer = document.getElementById('inspection-times-container');
+    const mainContent = document.getElementById('main-content');
+    const loadingIndicator = document.getElementById('loading-indicator');
     const detailMapContainer = document.getElementById('detail-map');
     
     // Commute Calculator Elements
@@ -18,14 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const commuteAddressInputEl = document.getElementById('commute-address-input');
     const commuteNameInputEl = document.getElementById('commute-name-input');
     const addCommuteLocationBtnEl = document.getElementById('add-commute-location-btn');
-    const presetDestinationsContainerEl = document.getElementById('preset-destinations-container'); // NEW
+    const presetDestinationsContainerEl = document.getElementById('preset-destinations-container');
 
     // --- 2. State Management ---
     let currentProperty = null;
     let commuteDestinations = []; 
     let activeCommuteMode = 'DRIVING';
 
-    // --- 3. Core Logic (renderPropertyDetails, etc. remain the same) ---
+    // --- 3. Core Logic ---
     function getPropertyIdFromUrl() {
         const params = new URLSearchParams(window.location.search);
         return params.get('id');
@@ -73,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loadMapScript(property);
 
-        document.getElementById('loading-indicator').classList.add('hidden');
-        document.getElementById('main-content').classList.remove('hidden');
+        loadingIndicator.classList.add('hidden');
+        mainContent.classList.remove('hidden');
     }
     
     function renderImageCarousel(imagesData, altText) {
@@ -168,15 +178,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. Commute Calculator Logic ---
 
     function setupCommuteCalculator() {
-        // ... (autocomplete setup remains the same)
+        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+            const autocomplete = new google.maps.places.Autocomplete(commuteAddressInputEl, {
+                types: ['address'],
+                componentRestrictions: { 'country': 'au' }
+            });
 
-        // NEW: Populate preset destination buttons
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (place && place.formatted_address) {
+                    addCommuteLocationBtnEl.disabled = false;
+                }
+            });
+        }
+        
         populatePresetDestinations();
 
-        // Add event listener for the new preset buttons container
         presetDestinationsContainerEl.addEventListener('click', handlePresetClick);
-        
-        // ... (other event listeners remain the same)
+        commuteAddressInputEl.addEventListener('input', () => {
+            addCommuteLocationBtnEl.disabled = commuteAddressInputEl.value.trim() === '';
+        });
         commuteModeTabsEl.addEventListener('click', handleTabClick);
         addCommuteLocationBtnEl.addEventListener('click', () => handleAddLocation());
         commuteResultsContainerEl.addEventListener('click', (e) => {
@@ -189,10 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // NEW: Function to create and render preset destination buttons
     function populatePresetDestinations() {
         if (!presetDestinationsContainerEl) return;
-        presetDestinationsContainerEl.innerHTML = ''; // Clear existing
+        presetDestinationsContainerEl.innerHTML = '';
         config.commonDestinations.forEach(dest => {
             const button = document.createElement('button');
             button.className = "text-sm font-medium text-accentPrimary bg-blue-100/50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors";
@@ -203,25 +223,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // NEW: Function to handle clicks on preset buttons
     function handlePresetClick(e) {
         if (e.target.tagName !== 'BUTTON') return;
-        
         const name = e.target.dataset.name;
         const address = e.target.dataset.address;
-        
-        // Check if this destination already exists
         const exists = commuteDestinations.some(d => d.address === address);
-        if (exists) {
-            // Optional: maybe flash the existing card to indicate it's already there
-            return;
-        }
-
-        // Use the existing handleAddLocation function to add it
+        if (exists) return;
         handleAddLocation(name, address);
     }
 
-    // MODIFIED: handleAddLocation now accepts optional parameters
     async function handleAddLocation(presetName = null, presetAddress = null) {
         const destinationAddress = presetAddress || commuteAddressInputEl.value;
         const destinationName = presetName || commuteNameInputEl.value || destinationAddress;
@@ -243,16 +253,11 @@ document.addEventListener('DOMContentLoaded', () => {
         await fetchCommuteTimeForDestination(newDestination, activeCommuteMode);
         renderCommuteResults();
 
-        // Only clear manual inputs
         if (!presetAddress) {
             commuteAddressInputEl.value = '';
             commuteNameInputEl.value = '';
         }
     }
-
-    // (The rest of the functions: handleTabClick, fetchCommuteTimeForDestination, 
-    // renderCommuteResults, loadMapScript, renderError, and other event listeners 
-    // remain exactly the same as the last version.)
 
     async function handleTabClick(e) {
         if (e.target.tagName !== 'BUTTON') return;
@@ -274,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             renderCommuteResults();
-            
             await Promise.all(fetchPromises);
         }
 
@@ -353,9 +357,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderError() {
-        document.getElementById('loading-indicator').classList.add('hidden');
-        document.getElementById('main-content').innerHTML = `<div class="p-4 text-center text-red-600"><p class="font-bold">加载失败</p><p class="mt-2 text-sm">无法找到该房源的详细信息。可能是链接已失效，或数据暂时不可用。</p><a href="./listings.html" class="mt-4 inline-block text-accentPrimary hover:underline">返回列表页</a></div>`;
-        document.getElementById('main-content').classList.remove('hidden');
+        loadingIndicator.classList.add('hidden');
+        mainContent.innerHTML = `<div class="p-4 text-center text-red-600"><p class="font-bold">加载失败</p><p class="mt-2 text-sm">无法找到该房源的详细信息。可能是链接已失效，或数据暂时不可用。</p><a href="./listings.html" class="mt-4 inline-block text-accentPrimary hover:underline">返回列表页</a></div>`;
+        mainContent.classList.remove('hidden');
     }
 
     // --- 6. Event Listeners ---
