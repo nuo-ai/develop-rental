@@ -11,3 +11,15 @@
   from = "/api/fetch-sheet"
   to = "/.netlify/functions/fetch-sheet"
   status = 200
+
+# This rule proxies map script requests to our secure function.
+[[redirects]]
+  from = "/api/get-map-script"
+  to = "/.netlify/functions/get-map-script"
+  status = 200
+
+# This rule proxies commute time requests to the get-directions function.
+[[redirects]]
+  from = "/api/get-directions"
+  to = "/.netlify/functions/get-directions"
+  status = 200

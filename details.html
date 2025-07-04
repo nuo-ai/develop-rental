@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 样式和脚本由父页面 index.html 提供 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -34,25 +33,36 @@
             background-color: #E3E3E3;
             border-radius: 0.5rem;
         }
+
+        /* 新增：通勤查询选项卡的样式 */
+        .commute-tab-btn {
+            padding: 0.5rem 1rem; /* 8px 16px */
+            font-size: 0.875rem; /* 14px */
+            font-weight: 600;
+            color: #595959; /* textSecondary */
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .commute-tab-btn:hover {
+            color: #2d2d2d; /* textPrimary */
+        }
+        .commute-tab-btn.active-tab {
+            color: #007BFF; /* accentPrimary */
+            border-bottom-color: #007BFF; /* accentPrimary */
+        }
     </style>
 </head>
 <body class="bg-bgCard font-sans flex flex-col h-screen">
 
-    <!-- Loading Indicator -->
     <div id="loading-indicator" class="flex items-center justify-center h-full">
         <p class="text-textSecondary">正在加载房源详情...</p>
     </div>
 
-    <!-- 主要内容区域，可独立滚动 -->
     <main id="main-content" class="flex-grow overflow-y-auto hidden">
-        <!-- 1. 图片与顶部导航 -->
         <div id="image-carousel" class="relative">
-            <!-- JavaScript will populate this section -->
-        </div>
+            </div>
 
-        <!-- 2. 核心信息区 -->
         <div class="p-4 pb-0">
-            <!-- 价格、地址、收藏 -->
             <div class="flex justify-between items-start">
                 <div>
                     <p id="property-price" class="text-2xl font-extrabold text-textPrice"></p>
@@ -71,11 +81,9 @@
                 </div>
             </div>
             
-            <!-- 房型与可入住日期 -->
             <div class="flex items-center text-sm text-textSecondary mt-3">
                 <div id="property-specs" class="flex items-center gap-3">
-                    <!-- JS will populate this -->
-                </div>
+                    </div>
                 <div class="mx-3 text-borderDefault">|</div>
                 <span id="property-type"></span>
             </div>
@@ -83,7 +91,6 @@
              <p id="property-bond" class="text-sm text-textSecondary mt-1"></p>
         </div>
         
-        <!-- 3. 操作按钮组 -->
         <div class="p-4">
             <div class="grid grid-cols-4 gap-2 text-center text-accentPrimary">
                 <a href="#" class="p-2 rounded-lg hover:bg-bgPage transition-colors">
@@ -107,7 +114,6 @@
 
         <hr class="h-px bg-borderDefault mx-4">
 
-        <!-- 4. 房源描述 -->
         <div class="p-4">
             <h2 class="text-lg font-bold text-textPrimary mb-3">Property Description</h2>
             <div id="description-wrapper">
@@ -116,32 +122,67 @@
                 <button id="read-more-btn" class="text-accentPrimary font-semibold text-sm mt-2 hover:underline">Read more</button>
             </div>
         </div>
-
-        <hr class="h-px bg-borderDefault mx-4">
         
-        <!-- 5. 地图位置 -->
+        <hr class="h-px bg-borderDefault mx-4">
+
         <div class="p-4">
             <h2 class="text-lg font-bold text-textPrimary mb-3">Map</h2>
-            <!-- UPDATED: Replaced img with a div for the dynamic map -->
             <div id="detail-map"></div>
         </div>
         
         <hr class="h-px bg-borderDefault mx-4">
+        
+        <div class="p-4">
+            <h2 class="text-lg font-bold text-textPrimary mb-4">通勤时间查询</h2>
+        
+            <div class="mb-4">
+                <p class="text-sm text-textSecondary">从</p>
+                <p id="commute-from-address" class="font-semibold text-textPrimary"></p> 
+            </div>
+        
+            <div id="commute-mode-tabs" class="flex border-b border-borderDefault mb-4 -mx-4 px-4">
+                <button data-mode="DRIVING" class="commute-tab-btn active-tab">驾车</button>
+                <button data-mode="TRANSIT" class="commute-tab-btn">公共交通</button>
+                <button data-mode="WALKING" class="commute-tab-btn">步行</button>
+                <button data-mode="BICYCLING" class="commute-tab-btn">自行车</button>
+            </div>
+        
+            <div id="commute-results-container" class="space-y-4">
+                </div>
+        
+            <div class="mt-6 pt-6 border-t border-borderDefault">
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label for="commute-address-input" class="block text-sm font-medium text-textSecondary mb-1">添加目的地</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass text-textSecondary absolute top-1/2 left-3 -translate-y-1/2 pointer-events-none"></i>
+                            <input type="text" id="commute-address-input" placeholder="输入大学、车站或地址" class="w-full pl-10 pr-4 py-2 bg-white border border-borderDefault rounded-lg focus:outline-none focus:ring-2 focus:ring-accentPrimary text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="commute-name-input" class="block text-sm font-medium text-textSecondary mb-1">别名 (可选)</label>
+                        <input type="text" id="commute-name-input" placeholder="例如 '我的学校'" class="w-full px-4 py-2 bg-white border border-borderDefault rounded-lg focus:outline-none focus:ring-2 focus:ring-accentPrimary text-sm">
+                    </div>
+                </div>
+                <div class="text-right mt-4">
+                    <button id="add-commute-location-btn" class="bg-accentPrimary text-white font-bold py-2 px-5 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                        添加
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr class="h-px bg-borderDefault mx-4">
 
-        <!-- 6. 看房时间 -->
         <div class="p-4">
             <h2 class="text-lg font-bold text-textPrimary mb-3">Inspection times</h2>
             <div id="inspection-times-container" class="space-y-3">
-                <!-- JS will populate this -->
-            </div>
+                </div>
         </div>
         
-        <!-- 空白占位，让底部内容滚动时有足够空间 -->
         <div class="h-4"></div>
 
     </main>
 
-    <!-- 关键！引入详情页的JavaScript文件 -->
     <script src="./scripts/details.js"></script>
 
 </body>

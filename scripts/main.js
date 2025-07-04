@@ -1,4 +1,4 @@
-// --- Sydney Student Rental Hub - Main JavaScript (Production Ready) ---
+// --- Sydney Student Rental Hub - Main JavaScript (Final Version) ---
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -15,13 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const favorites = this.getFavorites();
             const icon = buttonElement.querySelector('i');
             if (favorites.includes(String(id))) {
-                // Remove from favorites
                 const updatedFavorites = favorites.filter(favId => favId !== String(id));
                 localStorage.setItem(this.key, JSON.stringify(updatedFavorites));
                 buttonElement.classList.remove('is-favorite');
                 icon.classList.replace('fa-solid', 'fa-regular');
             } else {
-                // Add to favorites
                 favorites.push(String(id));
                 localStorage.setItem(this.key, JSON.stringify(favorites));
                 buttonElement.classList.add('is-favorite');
@@ -31,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- 2. CONFIGURATION & DOM ELEMENTS ---
-    // UPDATED: The data source is now our own Netlify function endpoint.
+    // FINAL: The data source is now permanently set to our own Netlify function endpoint.
     const SPREADSHEET_URL = '/api/fetch-sheet'; 
     const listingsContainer = document.querySelector('#listings-container');
     const searchInput = document.getElementById('search-input');
@@ -49,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. CORE FUNCTIONS ---
 
     async function fetchData() {
-        // UPDATED: We now fetch directly from our own API endpoint, no proxy needed.
+        // FINAL: We now fetch directly from our own API endpoint, no public proxy needed.
         try {
             const response = await fetch(SPREADSHEET_URL);
             if (!response.ok) throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
