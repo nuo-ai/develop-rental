@@ -180,37 +180,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupCommuteCalculator() {
         // Initialize Google Places Autocomplete on the input field
-        const autocomplete = new google.maps.places.Autocomplete(commuteAddressInputEl, {
-            types: ['address'],
-            componentRestrictions: { 'country': 'au' } // Restrict to Australia
-        });
+        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+            const autocomplete = new google.maps.places.Autocomplete(commuteAddressInputEl, {
+                types: ['address'],
+                componentRestrictions: { 'country': 'au' } // Restrict to Australia
+            });
 
-        autocomplete.addListener('place_changed', () => {
-            const place = autocomplete.getPlace();
-            if (place && place.formatted_address) {
-                addCommuteLocationBtnEl.disabled = false; // Enable button when a valid place is selected
-            }
-        });
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (place && place.formatted_address) {
+                    addCommuteLocationBtnEl.disabled = false; // Enable button when a valid place is selected
+                }
+            });
+        }
         
-        // Clear input and disable button if text is changed without selecting a place
         commuteAddressInputEl.addEventListener('input', () => {
             addCommuteLocationBtnEl.disabled = true;
         });
 
-        // Handle tab switching
-        commuteModeTabsEl.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON') {
-                activeCommuteMode = e.target.dataset.mode;
-                document.querySelector('.commute-tab-btn.active-tab').classList.remove('active-tab');
-                e.target.classList.add('active-tab');
-                renderCommuteResults(); // Re-render results for the new mode
-            }
-        });
-
-        // Handle adding a new location
+        commuteModeTabsEl.addEventListener('click', handleTabClick);
         addCommuteLocationBtnEl.addEventListener('click', handleAddLocation);
-
-        // Handle removing a location using event delegation
         commuteResultsContainerEl.addEventListener('click', (e) => {
             const removeButton = e.target.closest('.remove-commute-btn');
             if (removeButton) {
@@ -221,54 +210,72 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    async function handleTabClick(e) {
+        if (e.target.tagName !== 'BUTTON') return;
+
+        const newMode = e.target.dataset.mode;
+        if (newMode === activeCommuteMode) return;
+
+        activeCommuteMode = newMode;
+        document.querySelector('.commute-tab-btn.active-tab').classList.remove('active-tab');
+        e.target.classList.add('active-tab');
+
+        // For each destination, if the result for the new mode doesn't exist, fetch it.
+        commuteDestinations.forEach(dest => {
+            if (!dest.results[activeCommuteMode]) {
+                fetchCommuteTimeForDestination(dest, activeCommuteMode);
+            }
+        });
+
+        renderCommuteResults(); // Re-render results for the new mode
+    }
+
+    async function fetchCommuteTimeForDestination(destination, mode) {
+        // Set loading state for this specific mode
+        destination.isLoading = true;
+        renderCommuteResults();
+
+        const origin = `${currentProperty.latitude},${currentProperty.longitude}`;
+        try {
+            const response = await fetch(`/api/get-directions?origin=${origin}&destination=${destination.address}&mode=${mode}`);
+            if (!response.ok) throw new Error(`Directions API fetch failed with status ${response.status}`);
+            
+            const result = await response.json();
+            destination.results[mode] = result;
+        } catch (error) {
+            console.error('Failed to fetch commute time:', error);
+            destination.results[mode] = { error: '无法计算' };
+        } finally {
+            destination.isLoading = false;
+            renderCommuteResults();
+        }
+    }
+
     async function handleAddLocation() {
         const destinationAddress = commuteAddressInputEl.value;
         const destinationName = commuteNameInputEl.value || destinationAddress;
         if (!destinationAddress) return;
 
-        addCommuteLocationBtnEl.disabled = true; // Disable while processing
+        addCommuteLocationBtnEl.disabled = true;
 
         const newDestination = {
-            id: `dest_${new Date().getTime()}`, // Unique ID
+            id: `dest_${new Date().getTime()}`,
             name: destinationName,
             address: destinationAddress,
-            results: {}, // To store results for different modes
+            results: {},
             isLoading: true
         };
         commuteDestinations.push(newDestination);
-        renderCommuteResults(); // Show loading state immediately
+        
+        // Immediately fetch data for the currently active mode
+        fetchCommuteTimeForDestination(newDestination, activeCommuteMode);
 
-        // Fetch the result
-        const origin = `${currentProperty.latitude},${currentProperty.longitude}`;
-        try {
-            const response = await fetch(`/api/get-directions?origin=${origin}&destination=${destinationAddress}&mode=${activeCommuteMode}`);
-            if (!response.ok) throw new Error('Failed to fetch directions');
-            
-            const result = await response.json();
-            
-            // Find the destination and update its result
-            const destIndex = commuteDestinations.findIndex(d => d.id === newDestination.id);
-            if (destIndex > -1) {
-                commuteDestinations[destIndex].results[activeCommuteMode] = result;
-                commuteDestinations[destIndex].isLoading = false;
-            }
-        } catch (error) {
-            console.error(error);
-            const destIndex = commuteDestinations.findIndex(d => d.id === newDestination.id);
-            if (destIndex > -1) {
-                commuteDestinations[destIndex].results[activeCommuteMode] = { error: '无法计算' };
-                commuteDestinations[destIndex].isLoading = false;
-            }
-        } finally {
-            renderCommuteResults(); // Re-render with the fetched data or error
-            // Clear inputs
-            commuteAddressInputEl.value = '';
-            commuteNameInputEl.value = '';
-        }
+        commuteAddressInputEl.value = '';
+        commuteNameInputEl.value = '';
     }
 
     function renderCommuteResults() {
-        commuteResultsContainerEl.innerHTML = ''; // Clear previous results
+        commuteResultsContainerEl.innerHTML = '';
         if (commuteDestinations.length === 0) {
             commuteResultsContainerEl.innerHTML = `<p class="text-center text-sm text-textSecondary py-4">添加一个目的地来计算通勤时间。</p>`;
             return;
@@ -278,6 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = dest.results[activeCommuteMode];
             let resultHTML;
 
+            // Show loading if the calculation for the active mode is in progress
             if (dest.isLoading && !result) {
                 resultHTML = `<p class="font-bold text-lg text-textSecondary animate-pulse">计算中...</p>`;
             } else if (result) {
@@ -290,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }
             } else {
-                resultHTML = `<p class="font-bold text-lg text-textSecondary">--</p>`; // Not yet calculated for this mode
+                resultHTML = `<p class="font-bold text-lg text-textSecondary">--</p>`;
             }
 
             const cardHTML = `
@@ -309,19 +317,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
     // --- 5. Map and Script Loading ---
     
     function loadMapScript(property) {
-        // Define the callback function on the window object
         window.initDetailMapCallback = () => {
             initDetailMap(property);
-            // NOW we can initialize the commute calculator because the 'google.maps.places' library is available
             setupCommuteCalculator(); 
         };
 
         const script = document.createElement('script');
-        // MODIFIED: We add '&libraries=places' to the request to load the Autocomplete service
         script.src = `/api/get-map-script?callback=initDetailMapCallback&libraries=places`;
         script.async = true;
         script.defer = true;
