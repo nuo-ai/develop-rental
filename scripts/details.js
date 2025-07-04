@@ -3,7 +3,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. DOM Element Selectors ---
-    // Core Property Elements
     const imageCarouselEl = document.getElementById('image-carousel');
     const propertyPriceEl = document.getElementById('property-price');
     const propertyAddressEl = document.getElementById('property-address');
@@ -54,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderPropertyDetails(property) {
-        currentProperty = property; // Store the current property globally
+        currentProperty = property;
         document.title = `${property.address || '房源详情'} - 悉尼学生房源中心`;
         
         renderImageCarousel(property.images, property.address);
@@ -76,14 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderInspectionTimes(property.inspection_times);
 
-        // --- Commute Calculator Setup ---
         commuteFromAddressEl.textContent = `${property.address}, ${property.suburb} NSW ${property.postcode}`;
-        addCommuteLocationBtnEl.disabled = true; // Initially disable button
+        addCommuteLocationBtnEl.disabled = true;
 
-        // Load the map script, which now also loads the Places library
         loadMapScript(property);
 
-        // Hide loading indicator and show content
         loadingIndicator.classList.add('hidden');
         mainContent.classList.remove('hidden');
     }
@@ -211,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function handleTabClick(e) {
+    function handleTabClick(e) {
         if (e.target.tagName !== 'BUTTON') return;
         const newMode = e.target.dataset.mode;
         if (newMode === activeCommuteMode) return;
@@ -220,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.commute-tab-btn.active-tab').classList.remove('active-tab');
         e.target.classList.add('active-tab');
 
-        // For each destination, if the result for the new mode doesn't exist, fetch it.
         commuteDestinations.forEach(dest => {
             if (!dest.results[activeCommuteMode]) {
                 fetchCommuteTimeForDestination(dest, activeCommuteMode);
@@ -231,7 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchCommuteTimeForDestination(destination, mode) {
-        console.log(`Fetching for ${destination.name} with mode ${mode}`);
         destination.isLoading = true;
         renderCommuteResults();
 
@@ -241,14 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error(`Directions API fetch failed with status ${response.status}`);
             
             const result = await response.json();
-            console.log('Received result:', result);
             destination.results[mode] = result;
         } catch (error) {
             console.error('Failed to fetch commute time:', error);
             destination.results[mode] = { error: '无法计算' };
         } finally {
             destination.isLoading = false;
-            console.log('Finished fetching, re-rendering...');
             renderCommuteResults();
         }
     }
@@ -265,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
             name: destinationName,
             address: destinationAddress,
             results: {},
-            isLoading: false
+            isLoading: true // CORRECTED: Set initial state to loading
         };
         commuteDestinations.push(newDestination);
         
@@ -276,10 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCommuteResults() {
-        console.log('--- Rendering Commute Results ---');
-        console.log('Active Mode:', activeCommuteMode);
-        console.log('All Destinations:', JSON.parse(JSON.stringify(commuteDestinations)));
-
         commuteResultsContainerEl.innerHTML = '';
         if (commuteDestinations.length === 0) {
             commuteResultsContainerEl.innerHTML = `<p class="text-center text-sm text-textSecondary py-4">添加一个目的地来计算通勤时间。</p>`;
@@ -288,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         commuteDestinations.forEach(dest => {
             const result = dest.results[activeCommuteMode];
-            console.log(`Rendering card for ${dest.name}. Result for ${activeCommuteMode}:`, result);
             let resultHTML;
 
             if (dest.isLoading && !result) {
