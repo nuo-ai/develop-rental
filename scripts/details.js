@@ -1,4 +1,4 @@
-// --- Sydney Student Rental Hub - Details Page JavaScript (Final Complete Version) ---
+// --- Sydney Student Rental Hub - Details Page JavaScript (Final Corrected Version) ---
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -192,6 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
         commuteAddressInputEl.addEventListener('input', () => {
             if (commuteAddressInputEl.value.trim() === '') {
                  addCommuteLocationBtnEl.disabled = true;
+            } else {
+                 // This is a fallback for when a user types an address without using autocomplete.
+                 // It's not perfect but allows the button to be enabled.
+                 addCommuteLocationBtnEl.disabled = false;
             }
         });
 
@@ -207,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function handleTabClick(e) {
+    async function handleTabClick(e) {
         if (e.target.tagName !== 'BUTTON') return;
         const newMode = e.target.dataset.mode;
         if (newMode === activeCommuteMode) return;
@@ -216,11 +220,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.commute-tab-btn.active-tab').classList.remove('active-tab');
         e.target.classList.add('active-tab');
 
-        commuteDestinations.forEach(dest => {
-            if (!dest.results[activeCommuteMode]) {
-                fetchCommuteTimeForDestination(dest, activeCommuteMode);
-            }
-        });
+        const fetchPromises = commuteDestinations
+            .filter(dest => !dest.results[activeCommuteMode])
+            .map(dest => fetchCommuteTimeForDestination(dest, activeCommuteMode));
+
+        if (fetchPromises.length > 0) {
+            await Promise.all(fetchPromises);
+        }
 
         renderCommuteResults();
     }
@@ -241,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             destination.results[mode] = { error: '无法计算' };
         } finally {
             destination.isLoading = false;
-            renderCommuteResults();
+            // No final render here, handleTabClick or handleAddLocation will do it.
         }
     }
 
@@ -257,11 +263,13 @@ document.addEventListener('DOMContentLoaded', () => {
             name: destinationName,
             address: destinationAddress,
             results: {},
-            isLoading: true // CORRECTED: Set initial state to loading
+            isLoading: true
         };
         commuteDestinations.push(newDestination);
         
         await fetchCommuteTimeForDestination(newDestination, activeCommuteMode);
+        
+        renderCommuteResults(); // Final render after fetch is complete
 
         commuteAddressInputEl.value = '';
         commuteNameInputEl.value = '';
@@ -277,9 +285,10 @@ document.addEventListener('DOMContentLoaded', () => {
         commuteDestinations.forEach(dest => {
             const result = dest.results[activeCommuteMode];
             let resultHTML;
-
-            if (dest.isLoading && !result) {
-                resultHTML = `<p class="font-bold text-lg text-textSecondary animate-pulse">计算中...</p>`;
+            
+            // This condition is key: show loading if the flag is true for this destination
+            if (dest.isLoading) {
+                 resultHTML = `<p class="font-bold text-lg text-textSecondary animate-pulse">计算中...</p>`;
             } else if (result) {
                 if (result.error) {
                     resultHTML = `<p class="font-bold text-lg text-red-500">${result.error}</p>`;
@@ -290,6 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }
             } else {
+                // This state means data for this mode hasn't been fetched yet.
                 resultHTML = `<p class="font-bold text-lg text-textSecondary">--</p>`;
             }
 
